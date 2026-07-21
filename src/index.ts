@@ -19,6 +19,6 @@ export const sendAt = (cronTime: string | Date | DateTime): DateTime =>
 	new CronTime(cronTime).sendAt();
 
 export const timeout = (cronTime: string | Date | DateTime): number =>
-	new CronTime(cronTime).getTimeout();
+	{ throw new Error("STUB"); };
 
 export const validateCronExpression = CronTime.validateCronExpression;

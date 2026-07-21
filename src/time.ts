@@ -56,55 +56,15 @@ export class CronTime {
 		timeZone?: CronJobParams['timeZone'],
 		utcOffset?: CronJobParams['utcOffset']
 	) {
-		// runtime check for JS users
-		if (timeZone != null && utcOffset != null) {
-			throw new ExclusiveParametersError('timeZone', 'utcOffset');
-		}
-
-		if (timeZone) {
-			const dt = DateTime.fromObject({}, { zone: timeZone });
-			if (!dt.isValid) {
-				throw new CronError('Invalid timezone.');
-			}
-
-			this.timeZone = timeZone;
-		}
-
-		if (utcOffset != null) {
-			this.utcOffset = utcOffset;
-		}
-
-		if (timeZone == null && utcOffset == null) {
-			const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-			this.timeZone = systemTimezone;
-		}
-
-		if (source instanceof Date || source instanceof DateTime) {
-			this.source =
-				source instanceof Date ? DateTime.fromJSDate(source) : source;
-			this.realDate = true;
-		} else {
-			this.source = source;
-			this._parse(this.source);
-		}
-	}
+        throw new Error("STUB");
+    }
 
 	static validateCronExpression(cronExpression: string): {
 		valid: boolean;
 		error?: CronError;
 	} {
-		try {
-			new CronTime(cronExpression);
-			return {
-				valid: true
-			};
-		} catch (error: any) {
-			return {
-				valid: false,
-				error
-			};
-		}
-	}
+        throw new Error("STUB");
+    }
 
 	private _getWeekDay(date: DateTime) {
 		return date.weekday === 7 ? 0 : date.weekday;
@@ -195,8 +155,8 @@ export class CronTime {
 	 */
 	toJSON() {
 		return TIME_UNITS.map(unit => {
-			return this._wcOrAll(unit);
-		});
+            throw new Error("STUB");
+        });
 	}
 
 	/**
@@ -435,42 +395,8 @@ export class CronTime {
 	 *   - Parse the value.
 	 */
 	private _parse(source: string) {
-		source = source.toLowerCase();
-
-		if (Object.keys(PRESETS).includes(source)) {
-			source = PRESETS[source as keyof typeof PRESETS];
-		}
-
-		source = source.replace(/[a-z]{1,3}/gi, (alias: string) => {
-			if (Object.keys(ALIASES).includes(alias)) {
-				return ALIASES[alias as keyof typeof ALIASES].toString();
-			}
-
-			throw new CronError(`Unknown alias: ${alias}`);
-		});
-
-		const units = source.trim().split(/\s+/);
-
-		// seconds are optional
-		if (units.length < TIME_UNITS_LEN - 1) {
-			throw new CronError('Too few fields');
-		}
-
-		if (units.length > TIME_UNITS_LEN) {
-			throw new CronError('Too many fields');
-		}
-
-		const unitsLen = units.length;
-		for (const unit of TIME_UNITS) {
-			const i = TIME_UNITS.indexOf(unit);
-			// if the split source string doesn't contain all digits,
-			// assume defaults for first n missing digits.
-			// this adds support for 5-digit standard cron syntax
-			const cur =
-				units[i - (TIME_UNITS_LEN - unitsLen)] ?? PARSE_DEFAULTS[unit];
-			this._parseField(cur, unit);
-		}
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	 * parse individual field from the cron syntax provided.
@@ -484,85 +410,6 @@ export class CronTime {
 	 */
 
 	private _parseField(value: string, unit: TimeUnit) {
-		const typeObj = this[unit] as TimeUnitField<typeof unit>;
-		let pointer: Ranges[typeof unit];
-
-		const constraints = CONSTRAINTS[unit];
-		const low = constraints[0];
-		const high = constraints[1];
-
-		const fields = value.split(',');
-		fields.forEach(field => {
-			const wildcardIndex = field.indexOf('*');
-			if (wildcardIndex !== -1 && wildcardIndex !== 0) {
-				throw new CronError(
-					`Field (${field}) has an invalid wildcard expression`
-				);
-			}
-		});
-
-		// "*" is a shortcut to [low-high] range for the field
-		value = value.replace(RE_WILDCARDS, `${low}-${high}`);
-
-		// commas separate information, so split based on those
-		const allRanges = value.split(',');
-
-		for (const range of allRanges) {
-			const match = [...range.matchAll(RE_RANGE)][0];
-			if (match?.[1] !== undefined) {
-				const [, mLower, mUpper, mStep] = match;
-				let lower = parseInt(mLower, 10);
-				let upper = mUpper !== undefined ? parseInt(mUpper, 10) : undefined;
-
-				const wasStepDefined = mStep !== undefined;
-				const step = parseInt(mStep ?? '1', 10);
-				if (step === 0) {
-					throw new CronError(`Field (${unit}) has a step of zero`);
-				}
-
-				if (upper !== undefined && lower > upper) {
-					throw new CronError(`Field (${unit}) has an invalid range`);
-				}
-
-				const isOutOfRange =
-					lower < low ||
-					(upper !== undefined && upper > high) ||
-					(upper === undefined && lower > high);
-
-				if (isOutOfRange) {
-					throw new CronError(`Field value (${value}) is out of range`);
-				}
-
-				// positive integer higher than constraints[0]
-				lower = Math.min(Math.max(low, ~~Math.abs(lower)), high);
-
-				// positive integer lower than constraints[1]
-				if (upper !== undefined) {
-					upper = Math.min(high, ~~Math.abs(upper));
-				} else {
-					// if step is provided, the default upper range is the highest value
-					upper = wasStepDefined ? high : lower;
-				}
-
-				// count from the lower barrier to the upper
-				// forcing type cast here since we checked above that
-				// we are between constraint bounds
-				pointer = lower as typeof pointer;
-
-				do {
-					typeObj[pointer] = true; // mutates the field objects values inside CronTime
-					pointer += step;
-				} while (pointer <= upper);
-
-				// merge day 7 into day 0 (both Sunday), and remove day 7
-				// since we work with day-of-week 0-6 under the hood
-				if (unit === 'dayOfWeek') {
-					if (!typeObj[0] && !!typeObj[7]) typeObj[0] = typeObj[7];
-					delete typeObj[7];
-				}
-			} else {
-				throw new CronError(`Field (${unit}) cannot be parsed`);
-			}
-		}
-	}
+        throw new Error("STUB");
+    }
 }
